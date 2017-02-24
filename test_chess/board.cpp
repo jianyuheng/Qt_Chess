@@ -141,11 +141,11 @@ bool Board::canMove_JIANG(int moveId,int row,int col,int killId)
     //两个老将面对面
     if(_c[moveId]._red)
     {
-        if(row>2) return false;
+        if(row > 2)return false;
     }
     else
     {
-        if(row<7) return false;
+        if(row < 7)return false;
     }
     if(col<3||col>5)
     {
@@ -156,46 +156,159 @@ bool Board::canMove_JIANG(int moveId,int row,int col,int killId)
     int dc=_c[moveId]._col-col;
 
     //***************
-    int d=abs(dr)*10+abs(dc);//判断步长
+    int d;//判断步长
+    d=abs(dr)*10+abs(dc);
     if(d==1||d==10)
         return true;
-
-    return true;
+    else
+        return false;
 }
 
 bool Board::canMove_SHI(int moveId,int row,int col,int killId)
 {
-    return true;
+    //只能在九宫格内移动
+    if(_c[moveId]._red)
+    {
+        if(row > 2)return false;
+    }
+    else
+    {
+        if(row < 7)return false;
+    }
+    if(col<3||col>5)
+    {
+        return false;
+    }
+    int dr=_c[moveId]._row-row;
+    int dc=_c[moveId]._col-col;
+
+    //***************
+    int d;//判断步长
+    d=abs(dr)*10+abs(dc);
+    if(d==11)
+        return true;
+    else
+        return false;
+
 }
 
 bool Board::canMove_XIANG(int moveId,int row,int col,int killId)
 {
-    return true;
+    //象走田，且象不能过河，
+
+    int dr=_c[moveId]._row-row;
+    int dc=_c[moveId]._col-col;
+    //***************
+    int d;//判断步长
+    d=abs(dr)*10+abs(dc);
+    if(d==22)
+    {
+        //田字中心有子的话，象无法走田
+        //田中心坐标（(_c[moveId]._row+row)/2，(_c[moveId]._col+col)/2）
+        int i=0;
+        for(;i<32;i++)
+        {
+            if(_c[i]._row==(_c[moveId]._row+row)/2 && _c[i]._col==(_c[moveId]._col+col)/2&&_c[i]._dead==false)
+            {
+                 break;
+            }
+
+        }
+
+        if(i<32)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+
+
+    }
+    else
+        return false;
 }
 
 bool Board::canMove_MA(int moveId,int row,int col,int killId)
 {
-    return true;
+    //马走日，蹩脚的情况
+    int dr=_c[moveId]._row-row;
+    int dc=_c[moveId]._col-col;
+
+    //***************
+    int d;//判断步长
+    d=abs(dr)*10+abs(dc);
+    if(d==21)
+    {
+        //蹩脚,分四个方向考虑
+        //先用穷举
+
+    }
+    else
+        return false;
 }
 
 bool Board::canMove_PAO(int moveId,int row,int col,int killId)
 {
+    //炮走直线
+    //炮打隔子
     return true;
 }
 
 bool Board::canMove_JU(int moveId,int row,int col,int killId)
 {
+    //車走直线
+    if(_c[moveId]._row!=row&&_c[moveId]._col!=col)
+        return false;
     return true;
 }
 
 bool Board::canMove_BING(int moveId,int row,int col,int killId)
 {
-    return true;
+    //只能往前移动,需要区分黑子还是红子
+    //红子
+    if(_c[moveId]._red)
+    {
+        //不能向后移动
+        if(_c[moveId]._row>row)
+            return false;
+        //过河之前，不能左右移动
+        if(_c[moveId]._row<5)
+        {
+            if(_c[moveId]._col!=col)
+                return false;
+
+        }
+    }
+    //黑子
+    else
+    {
+        //不能向后移动
+        if(_c[moveId]._row<row)
+            return false;
+        //过河之前，不能左右移动
+        if(_c[moveId]._row>4)
+        {
+            if(_c[moveId]._col!=col)
+                return false;
+        }
+    }
+    int dr=_c[moveId]._row-row;
+    int dc=_c[moveId]._col-col;
+
+    //***************
+    int d;//判断步长
+    d=abs(dr)*10+abs(dc);
+    if(d==1||d==10)
+        return true;
+    else
+        return false;
 }
 
 bool Board::canMove(int moveId, int row, int col, int killId)
 {
-    if(_c[moveId]._red==_c[killId]._red)
+    if(killId!=-1&&_c[moveId]._red==_c[killId]._red)
     {
         //换选择
         _selectId=killId;
@@ -204,31 +317,28 @@ bool Board::canMove(int moveId, int row, int col, int killId)
     }
     switch(_c[moveId]._type)
     {
-    case Chess::JIANG:
-        return canMove_JIANG(moveId,row,col,killId);
+        case Chess::JIANG:
+            return canMove_JIANG(moveId,row,col,killId);
+            break;
+        case Chess::SHI:
+            return canMove_SHI(moveId,row,col,killId);
+            break;
+        case Chess::XIANG:
+            return canMove_XIANG(moveId,row,col,killId);
+            break;
+        case Chess::JU:
+             return canMove_JU(moveId,row,col,killId);
         break;
-    case Chess::SHI:
-        return canMove_SHI(moveId,row,col,killId);
-        break;
-    case Chess::XIANG:
-        return canMove_XIANG(moveId,row,col,killId);
-        break;
-    case Chess::JU:
-        return canMove_JU(moveId,row,col,killId);
-        break;
-    case Chess::MA:
-        return canMove_MA(moveId,row,col,killId);
-        break;
-    case Chess::BING:
-        return canMove_BING(moveId,row,col,killId);
-        break;
-    case Chess::PAO:
-        return canMove_PAO(moveId,row,col,killId);
-        break;
-
+        case Chess::MA:
+            return canMove_MA(moveId,row,col,killId);
+            break;
+        case Chess::BING:
+            return canMove_BING(moveId,row,col,killId);
+            break;
+        case Chess::PAO:
+            return canMove_PAO(moveId,row,col,killId);
+            break;
     }
-
-    return true;
 
 }
 
@@ -270,10 +380,14 @@ void Board::mouseReleaseEvent(QMouseEvent *ev)
     //若选择了棋子，那么可以走棋或者选择其他棋子
     if(_selectId==-1)
     {
-        if(clickId!=-1)
+        if(clickId!=-1)//如果当前点击位置是棋子，那么判断是否轮到红（黑）下棋
         {
-            _selectId=clickId;
-            update();
+            //第一次选棋子
+            if(_redTurn==_c[clickId]._red)
+            {
+                _selectId=clickId;
+                update();
+            }
         }
     }
     else//若已经选择了棋子，选择移动棋子
@@ -282,11 +396,14 @@ void Board::mouseReleaseEvent(QMouseEvent *ev)
         {//走棋
             _c[_selectId]._row=row;
             _c[_selectId]._col=col;
+            //判断点击位置是否是棋子
             if(clickId!=-1)
             {
                 _c[clickId]._dead=true;
             }
             _selectId=-1;
+            clickId=-1;
+            _redTurn=!_redTurn;
             update();
         }
     }

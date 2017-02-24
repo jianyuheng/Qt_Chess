@@ -51,6 +51,7 @@ private:
 
     //走棋
     int _selectId=-1;
+    bool _redTurn=true;//下棋顺序
 };
 
 #endif // BOARD_H
